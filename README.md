@@ -15,7 +15,7 @@ My system includes the following components: <br>
 10) CanaKit 5A USB-C Power Supply with PD for the Raspberry Pi 5 <br>
 11) Generic USB Power Supply for monitor <br>
 12) Micro HDMI to HDMI cable <br>
-<p>At the time of this writing, the total value of the system is about $450.00</p>
+<p>At the time of this writing, the total cost of the system is about $450.00</p>
 
 # Section 2: Initial Operating System Installation
 
