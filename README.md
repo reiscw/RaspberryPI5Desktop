@@ -38,4 +38,53 @@ Using the appropriate tool at <a href=https://www.raspberrypi.com/software/>Rasp
 9. Connect Power Supplies
 10. Connect Wireless Mouse
 
-# Section 4: Initial Boot + NVME Operating System Assembly
+# Section 4: Initial Boot + Firmware Update + NVME Operating System Installation
+
+1. Boot and login to the Raspberry Pi 5
+2. sudo rpi-update
+3. sudo reboot
+4. Use the built-in imager utility to write the operating system to the NVME drive (confirm the same settings)
+5. sudo nano /boot/firmware/config.txt
+6. Add dtparam=pciex1_gen=3 to the end of config.txt and save (CTRL+X + Y)
+7. sudo reboot
+8. sudo raspi-config
+9. From Advanced Options, select Bootloader Version and set to Latest.
+10. Select Finish
+11. sudo reboot
+12. Remove MicroSD card
+
+# Section 5: Enable encryption of home directory
+
+Please note that these instructions were modified from the instructions provided by Leigh McCulloch at his <A href="https://leighmcculloch.com/posts/ubuntu-encrypt-home-directory-with-gocryptfs/">website</A>
+
+1. Boot and login to the Raspberry Pi 5
+2. sudo apt-get install -y libpam-mount gocryptfs
+3. sudo nano /etc/fuse.conf, uncomment user_allow_other and save (CTRL+X + Y)
+4. sudo nano /etc/security/pam_mount.conf.xml, and before the last XML tag (replacing your username) and save:
+```console
+<volume
+  user="yourusername"
+  fstype="fuse"
+  options="nodev,nosuid,quiet,nonempty,allow_other"
+  path="/usr/local/bin/gocryptfs#/home/%(USER).cipher"
+  mountpoint="/home/%(USER)"
+/>
+```
+5. Backup your home directory:
+```
+cd /home
+sudo tar cvf $USER.tar $USER
+```
+6. Create the encrypted directory:
+```
+sudo mkdir $USER.cipher
+sudo chown $USER:$USER $USER.cipher
+```
+7. Initialize encryption: gocryptfs -init $USER.cipher
+8. Clear the home directory: rm -fr /home/$USER/* /home/$USER/.*
+9. Add a file to indicate if the encrypted directory is not mounted: touch /home/$USER/GOCRYPTFS_NOT_MOUNTED
+10. Mount the encrypted directory: gocryptfs $USER.cipher $USER
+11. Copy the home directory contents into the encrypted directory: tar xvf $USER.tar --strip-components=1 -C $USER
+12. Add file to indicate if the encrypted directory is mounted: touch /home/$USER/GOCRYPTFS_MOUNTED
+13. sudo reboot, check after login that GOCRYPTFS_MOUNTED is present in the home directory
+14. Remove backup files
