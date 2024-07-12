@@ -57,7 +57,7 @@ Using the appropriate tool at <a href=https://www.raspberrypi.com/software/>Rasp
 3. Add ecryptfs to /etc/modules-load.d/modules.conf
 4. Enable root account by executing sudo su and using passwd to set a root password
 5. Reboot; at logon screen, do Control+Alt+F1 to switch to a TTY. Log in as root.
-6. Execute ecryptfs-migrate-home -u <your username>
+6. Execute ecryptfs-migrate-home -u username
 7. Exit root account (exit)
 8. Login as yourself and follow directions
 9. Reboot
