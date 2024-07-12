@@ -19,11 +19,7 @@ My system includes the following components: <br>
 
 # Section 2: Initial Operating System Installation
 
-Using the appropriate tool at <a href=https://www.raspberrypi.com/software/>Raspberry Pi OS</a>, install Raspberry Pi OS to the MicroSD card. Note that at this time, confirm the following settings: <br>
-1. Hostname
-2. Username
-3. Password
-4. Wireless LAN
+Using the appropriate tool at <a href=https://www.raspberrypi.com/software/>Raspberry Pi OS</a>, install Raspberry Pi OS to the MicroSD card. Do not preload any settings. This tends to cause issues with the setting of the system locale and the keyboard language (I have found that the keyboard gets stuck in UK mode, where some keys like @ and # function differently.
 
 # Section 3: Equipment assembly
 
@@ -43,7 +39,7 @@ Using the appropriate tool at <a href=https://www.raspberrypi.com/software/>Rasp
 1. Boot and login to the Raspberry Pi 5
 2. sudo rpi-update
 3. sudo reboot
-4. Use the built-in imager utility to write the operating system to the NVME drive (confirm the same settings)
+4. Use the built-in imager utility to write the operating system to the NVME drive (do not preset settings)
 5. sudo nano /boot/firmware/config.txt
 6. Add dtparam=pciex1_gen=3 to the end of config.txt and save (CTRL+X + Y)
 7. sudo reboot
@@ -52,39 +48,22 @@ Using the appropriate tool at <a href=https://www.raspberrypi.com/software/>Rasp
 10. Select Finish
 11. sudo reboot
 12. Remove MicroSD card
+13. In /etc/sudoers.d/ execute sudo mv 010_pi-nopasswd .010_pi-nopasswd (this requires entering your password to use sudo)
 
 # Section 5: Enable encryption of home directory
 
-Please note that these instructions were modified from the instructions provided by Leigh McCulloch at his <A href="https://leighmcculloch.com/posts/ubuntu-encrypt-home-directory-with-gocryptfs/">website</A>
+1. sudo apt-get install ecryptfs-utils rsync lsof
+2. sudo modprobe ecryptfs
+3. Add ecryptfs to /etc/modules-load.d/modules.conf
+4. Enable root account by executing sudo su and using passwd to set a root password
+5. Reboot; at logon screen, do Control+Alt+F1 to switch to a TTY. Log in as root.
+6. Execute ecryptfs-migrate-home -u <your username>
+7. Exit root account (exit)
+8. Login as yourself and follow directions
+9. Reboot
+10. Delete backup files if everything is working properly
+11. Use ecryptfs-unwrap-passphrase to store passphrase in a safe location
 
-1. Boot and login to the Raspberry Pi 5
-2. sudo apt-get install -y libpam-mount gocryptfs
-3. sudo nano /etc/fuse.conf, uncomment user_allow_other and save (CTRL+X + Y)
-4. sudo nano /etc/security/pam_mount.conf.xml, and before the last XML tag (replacing your username) and save:
-```console
-<volume
-  user="yourusername"
-  fstype="fuse"
-  options="nodev,nosuid,quiet,nonempty,allow_other"
-  path="/usr/local/bin/gocryptfs#/home/%(USER).cipher"
-  mountpoint="/home/%(USER)"
-/>
-```
-5. Backup your home directory:
-```
-cd /home
-sudo tar cvf $USER.tar $USER
-```
-6. Create the encrypted directory:
-```
-sudo mkdir $USER.cipher
-sudo chown $USER:$USER $USER.cipher
-```
-7. Initialize encryption: gocryptfs -init $USER.cipher
-8. Clear the home directory: rm -fr /home/$USER/* /home/$USER/.*
-9. Add a file to indicate if the encrypted directory is not mounted: touch /home/$USER/GOCRYPTFS_NOT_MOUNTED
-10. Mount the encrypted directory: gocryptfs $USER.cipher $USER
-11. Copy the home directory contents into the encrypted directory: tar xvf $USER.tar --strip-components=1 -C $USER
-12. Add file to indicate if the encrypted directory is mounted: touch /home/$USER/GOCRYPTFS_MOUNTED
-13. sudo reboot, check after login that GOCRYPTFS_MOUNTED is present in the home directory
-14. Remove backup files
+# Section 6: Install special software as desired
+
+The "Recommended Software" application can install and remove specific software packages. I generally select the ones that I want (including, for example, Mathematica) and deselect the ones I do not want. For all other software installation, I use the standard package manager.
